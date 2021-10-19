@@ -15,7 +15,8 @@ frame_width = int(cap.get(3))
 frame_height = int(cap.get(4))
 
 # Define the codec and create VideoWriter object.The output is stored in 'outpy.avi' file.
-out = cv2.VideoWriter('outpy.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 30, (frame_width,frame_height))
+filename_videos = "videos/Recording_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".avi"
+out = cv2.VideoWriter(filename_videos,cv2.VideoWriter_fourcc('M','J','P','G'), 30, (frame_width,frame_height))
 
 while(True):
     ret, frame = cap.read()
@@ -32,9 +33,8 @@ while(True):
         pressedKey = cv2.waitKey(1) & 0xFF
         if pressedKey == ord('s'):
             print("Taking Screenshot")
-            filename = "images/Screenshot_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".jpeg"
-            print(filename)
-            cv2.imwrite(filename, frame)
+            filename_images = "images/Screenshot_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".jpeg"
+            cv2.imwrite(filename_images, frame)
 
         # Press Q on keyboard to stop recording
         if pressedKey == ord('q'):
