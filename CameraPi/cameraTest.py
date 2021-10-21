@@ -1,6 +1,28 @@
 import cv2
 import numpy as np
 from datetime import datetime
+# import RPi.GPIO as GPIO
+from gpiozero import Button
+from time import sleep
+
+def button_callback(channel):
+    print(channel)
+    print("Button Pressed")
+
+# setting up
+in1 = 23
+
+button = Button(in1)
+
+# GPIO.setmode( GPIO.BCM)
+# #GPIO.setup(in1, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+# GPIO.setup(in1, GPIO.IN)
+
+# GPIO.setup(out1, GPIO.OUT)
+
+# GPIO.output(out1, GPIO.LOW)
+
+# GPIO.setwarnings(False)
 
 # Create a VideoCapture object
 cap = cv2.VideoCapture(0)
@@ -31,6 +53,17 @@ while(True):
         
         #Take picture
         pressedKey = cv2.waitKey(1) & 0xFF
+        
+        
+        if button.is_pressed:
+            print("BUTTON HAS BEEN PRESSED")
+            button.wait_for_release(2)
+#         if GPIO.input(in1):
+#             print("Button Pressed")
+#         if GPIO.input(in1):
+#             button_callback(in1)
+            #GPIO.add_event_detect(in1,GPIO.RISING,callback=button_callback) # Setup event on pin 10 rising edge
+        
         if pressedKey == ord('s'):
             print("Taking Screenshot")
             filename_images = "images/Screenshot_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".jpeg"
