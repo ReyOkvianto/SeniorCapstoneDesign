@@ -5,24 +5,42 @@ from datetime import datetime
 from gpiozero import Button
 from time import sleep
 
-def button_callback(channel):
-    print(channel)
-    print("Button Pressed")
+# class ControllerButtons():
+#     
+#     ScreenshotButton = None
+#     RecordButton = None
+#     UpButton = None
+#     DownButton = None
+#     LightsButton = None
+#     
+#     Active_State = False
+#     Previous_State = Button(1)
+#     
+#     def __init__(self, ScreenshotIn, RecordIn, UpIn, DownIn, LightsIn):
+#         
+#         self.ScreenshotButton = Button(ScreenshotIn)
+#         self.RecordButton = Button(RecordIn)
+#         self.UpButton = Button(UpIn)
+#         self.DownButton = Button(DownIn)
+#         self.LightsButton = Button(LightsIn)
+
 
 # setting up
-in1 = 23
+ScreenshotIn = 18
+RecordIn = 23
+UpIn = 24
+DownIn = 25
+LightsIn = 21
+Active_State = False
+Previous_State = Button(1)
 
-button = Button(in1)
+ScreenshotButton = Button(ScreenshotIn)
+RecordButton = Button(RecordIn)
+UpButton = Button(UpIn)
+DownButton = Button(DownIn)
+LightsButton = Button(LightsIn)
 
-# GPIO.setmode( GPIO.BCM)
-# #GPIO.setup(in1, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-# GPIO.setup(in1, GPIO.IN)
 
-# GPIO.setup(out1, GPIO.OUT)
-
-# GPIO.output(out1, GPIO.LOW)
-
-# GPIO.setwarnings(False)
 
 # Create a VideoCapture object
 cap = cv2.VideoCapture(0)
@@ -40,6 +58,8 @@ frame_height = int(cap.get(4))
 filename_videos = "videos/Recording_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".avi"
 out = cv2.VideoWriter(filename_videos,cv2.VideoWriter_fourcc('M','J','P','G'), 30, (frame_width,frame_height))
 
+i = 0
+
 while(True):
     ret, frame = cap.read()
 
@@ -55,19 +75,76 @@ while(True):
         pressedKey = cv2.waitKey(1) & 0xFF
         
         
-        if button.is_pressed:
-            print("BUTTON HAS BEEN PRESSED")
-            button.wait_for_release(2)
-#         if GPIO.input(in1):
-#             print("Button Pressed")
-#         if GPIO.input(in1):
-#             button_callback(in1)
-            #GPIO.add_event_detect(in1,GPIO.RISING,callback=button_callback) # Setup event on pin 10 rising edge
-        
-        if pressedKey == ord('s'):
+        if ScreenshotButton.is_pressed and Active_State == False:
+            Active_State = True
+            i += 1
+            print("SCREENSHOT BUTTON HAS BEEN PRESSED", i)
             print("Taking Screenshot")
             filename_images = "images/Screenshot_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".jpeg"
             cv2.imwrite(filename_images, frame)
+            Previous_State = ScreenshotButton
+#             ScreenshotButton.wait_for_release(2)
+        if ScreenshotButton.is_active == False and Previous_State == ScreenshotButton:
+            Active_State = False
+            i+=1
+            print("Screenshot button not being pressed lol", i)
+#         print(ScreenshotButton.is_active)
+            
+            
+            
+        if RecordButton.is_pressed and Active_State == False:
+            Active_State = True
+            i+=1
+            print("RECORD BUTTON HAS BEEN PRESSED", i)
+            Previous_State = RecordButton
+#             RecordButton.wait_for_release(2)
+        if RecordButton.is_active == False and Previous_State == RecordButton:
+            Active_State = False
+            i+=1
+            print("Record button not being pressed lol", i)
+            
+            
+            
+        if UpButton.is_pressed and Active_State == False:
+            Active_State = True
+            i+=1
+            print("UP BUTTON HAS BEEN PRESSED", i)
+            Previous_State = UpButton
+        if UpButton.is_active == False and Previous_State == UpButton:
+            Active_State = False
+            i+=1
+            print("UP button not being pressed lol", i)
+            
+            
+            
+        if DownButton.is_pressed and Active_State == False:
+            Active_State = True
+            i+=1
+            print("DOWN BUTTON HAS BEEN PRESSED", i)
+            Previous_State = DownButton
+        if DownButton.is_active == False and Previous_State == DownButton:
+            Active_State = False
+            i+=1
+            print("Down button not being pressed lol", i)
+            
+            
+            
+        if LightsButton.is_pressed and Active_State == False:
+            Active_State = True
+            i+=1
+            print("LIGHT BUTTON HAS BEEN PRESSED", i)
+            Previous_State = LightsButton
+        if LightsButton.is_active == False and Previous_State == LightsButton:
+            Active_State = False
+            i+=1
+            print("Light button not being pressed lol", i)
+            
+
+        
+#         if pressedKey == ord('s'):
+#             print("Taking Screenshot")
+#             filename_images = "images/Screenshot_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".jpeg"
+#             cv2.imwrite(filename_images, frame)
 
         # Press Q on keyboard to stop recording
         if pressedKey == ord('q'):
