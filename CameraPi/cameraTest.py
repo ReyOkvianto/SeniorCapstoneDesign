@@ -195,10 +195,10 @@ while(True):
 #             
 
         
-#         if pressedKey == ord('s'):
-#             print("Taking Screenshot")
-#             filename_images = "images/Screenshot_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".jpeg"
-#             cv2.imwrite(filename_images, frame)
+        if pressedKey == ord('s'):
+            print("Taking Screenshot")
+            filename_images = "images/Screenshot_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".jpeg"
+            cv2.imwrite(filename_images, frame)
 
         # Press Q on keyboard to stop recording
         if pressedKey == ord('q'):
