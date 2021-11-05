@@ -26,7 +26,7 @@ LightsButton = Buttonz.LightsButton
 
 loraController = LoRaController()
 
-thread = Thread(target=loraController.standby_mode, args=(Buttonz.GetCommand,))
+thread = Thread(target=loraController.standby_mode, args=(Buttonz.GetCommand, Buttonz.SetText, ))
 thread.start()
 
 
@@ -35,12 +35,13 @@ while(True):
 
     if ret == True: 
 
+        images = np.vstack((Buttonz.recording_img, frame, Buttonz.status_img))
+
+        cv2.imshow('images', images)
+
         # Write the frame into the file 'output.avi'
         if (Buttonz.out != None):
             Buttonz.out.write(frame)
-
-        # Display the resulting frame    
-        cv2.imshow('frame',frame)
         
         pressedKey = cv2.waitKey(1) & 0xFF
         

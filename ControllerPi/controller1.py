@@ -30,15 +30,15 @@ y_pos = int((image_height) / 2)
 img.save('hello_world.png')
 
 last_time = datetime.now()
+
+img2 = cv2.imread('hello_world.png')
+cv2.putText(img2, "AYOOOO", (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
+
 while(True):
     ret, frame = cap.read()
 
     if ret == True: 
         # Use opencv to read in two images on top of each other
-        
-        img2 = cv2.imread('hello_world.png')
-        
-        cv2.putText(img2, "AYOOOO", (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
 
         images = np.vstack((frame, img2))
 
@@ -47,8 +47,13 @@ while(True):
         pressedKey = cv2.waitKey(1) & 0xFF
         # Press Q on keyboard to stop recording
         if pressedKey == ord('q'):
-            print("Terminating")
-            break
+            img2 = cv2.imread('hello_world.png')
+            cv2.putText(img2, "test1", (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
+            
+        if pressedKey == ord('s'):
+            img2 = cv2.imread('hello_world.png')
+            cv2.putText(img2, "test2", (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
+            
 
 # When everything done, release the video capture and video write objects
 cap.release()
