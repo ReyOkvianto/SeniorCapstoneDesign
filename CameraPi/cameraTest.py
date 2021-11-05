@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 from datetime import datetime
-# import RPi.GPIO as GPIO
 from gpiozero import Button
 from time import sleep
 
