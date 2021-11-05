@@ -2,11 +2,12 @@ import logging
 import time
 from argparse import ArgumentParser
 from datetime import datetime
+from threading import *
 
 import serial
 
 
-class LoRaController():
+class LoRaController(Thread):
 
     # constants
     Address = 115
@@ -18,6 +19,8 @@ class LoRaController():
     def __init__(self):
         logging.basicConfig(filename='output.log', filemode='w', level=logging.DEBUG)
         
+        Thread.__init__(self)
+
         print("Connecting to REYAX RYLR896 transceiver module…")
         self.Serial = serial.Serial(
             port="/dev/serial0",
@@ -34,16 +37,17 @@ class LoRaController():
             #Set up and check lora connection
             self.set_lora_config()  
             self.check_lora_config()
+            self.connect_to_camera()
 
 
     def set_lora_config(self):
         # configures the REYAX RYLR896 transceiver module
 
-        self.Serial.write(str.encode("AT+ADDRESS=" + str(ADDRESS) + "\r\n"))
+        self.Serial.write(str.encode("AT+ADDRESS=" + str(self.Address) + "\r\n"))
         serial_payload = (self.Serial.readline())
         print("Address set?", serial_payload.decode(encoding="utf-8"))
 
-        self.Serial.write(str.encode("AT+NETWORKID=" + str(NETWORK_ID) + "\r\n"))
+        self.Serial.write(str.encode("AT+NETWORKID=" + str(self.Network) + "\r\n"))
         serial_payload = (self.Serial.readline())
         print("Network Id set?", serial_payload.decode(encoding="utf-8"))
 
@@ -116,17 +120,16 @@ class LoRaController():
                     logging.error("ValueError: {}".format(payload))
                     
                     
-    def standby_mode(self):
+    def standby_mode(self, get_command):
         while True:
-            user_input = input("ENTER COMMAND: ")
-            
-            if user_input == "1":
-                self.end("UP")
+            command = get_command()
+            if command == "MOVE CAMERA UP":
+                self.send("UP")
                 self.wait_read()
-            elif user_input == "2":
+            elif command == "MOVE CAMERA DOWN":
                 self.send("DOWN")
                 self.wait_read()
-            elif user_input == "3":
+            elif command == "TOGGLE LIGHT":
                 self.send("LIGHT")
                 self.wait_read()
         

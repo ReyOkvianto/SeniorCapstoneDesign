@@ -19,6 +19,8 @@ class ControllerButtons():
     
     Active_State = False
     Previous_State = Button(1)
+
+    Command = None
     
     def __init__(self, ScreenshotIn, RecordIn, UpIn, DownIn, LightsIn):
         
@@ -55,10 +57,15 @@ class ControllerButtons():
                 else:
                     self.RecordStop()
             if self.UpButton == button:
+                self.Command = "MOVE CAMERA UP"
                 print("Up BUTTON HAS BEEN PRESSED")
+                
             if self.DownButton == button:
+                self.Command = "MOVE CAMERA DOWN"
                 print("Down BUTTON HAS BEEN PRESSED")
+
             if self.LightsButton == button:
+                self.Command = "TOGGLE LIGHT"
                 print("Lights BUTTON HAS BEEN PRESSED")
 #             print("Taking Screenshot")
 #             filename_images = "images/Screenshot_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".jpeg"
@@ -69,16 +76,18 @@ class ControllerButtons():
     def Released(self, button):
             if button.is_active == False and self.Previous_State == button:
                 self.Active_State = False
-                if self.ScreenshotButton == button:
-                    print("SCREENSHOT BUTTON HAS BEEN released")
-                if self.RecordButton == button:
-                    print("Record BUTTON HAS BEEN released")
-                if self.UpButton == button:
-                    print("Up BUTTON HAS BEEN released")
-                if self.DownButton == button:
-                    print("Down BUTTON HAS BEEN released")
-                if self.LightsButton == button:
-                    print("Lights BUTTON HAS BEEN released")
+                #if self.ScreenshotButton == button:
+                #    print("SCREENSHOT BUTTON HAS BEEN released")
+                #if self.RecordButton == button:
+                #    print("Record BUTTON HAS BEEN released")
+                #if self.UpButton == button:
+                #    print("Up BUTTON HAS BEEN released")
+                #if self.DownButton == button:
+                #    print("Down BUTTON HAS BEEN released")
+                #if self.LightsButton == button:
+                    #print("Lights BUTTON HAS BEEN released")
+
+                self.Command = None
 #         print(ScreenshotButton.is_active)
 
     def RecordStart(self):
@@ -94,3 +103,8 @@ class ControllerButtons():
     def TakeScreenshot(self, frame):
         filename_images = "images/Screenshot_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".jpeg"
         cv2.imwrite(filename_images, frame)
+
+    def GetCommand(self):
+        return self.Command
+
+

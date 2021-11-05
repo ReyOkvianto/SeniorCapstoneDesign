@@ -4,6 +4,8 @@ from datetime import datetime
 from gpiozero import Button
 from time import sleep
 from ControllerButtons import ControllerButtons
+from LoRaController import LoRaController
+from threading import *
 
 # setting up
 # ScreenshotIn = 18
@@ -22,10 +24,13 @@ UpButton = Buttonz.UpButton
 DownButton = Buttonz.DownButton
 LightsButton = Buttonz.LightsButton
 
+loraController = LoRaController()
+
+thread = Thread(target=loraController.standby_mode, args=(Buttonz.GetCommand,))
+thread.start()
+
+
 while(True):
-    
-    
-    
     ret, frame = Buttonz.cap.read()
 
     if ret == True: 
@@ -37,7 +42,6 @@ while(True):
         # Display the resulting frame    
         cv2.imshow('frame',frame)
         
-        #Get key press
         pressedKey = cv2.waitKey(1) & 0xFF
         
         Buttonz.Pressed(ScreenshotButton, frame=frame)
@@ -60,6 +64,10 @@ while(True):
             print("Terminating")
             break
 
+
+        if pressedKey == ord('s'):
+            loraController.send("HELLO")
+
         
     # Break the loop
     else:
@@ -70,40 +78,3 @@ Buttonz.cap.release()
 
 # Closes all the frames
 cv2.destroyAllWindows()
-
-
-
-
-# LORA CONTROLLER MAIN
-
-
-# def main():
-#     logging.basicConfig(filename='output.log', filemode='w', level=logging.DEBUG)
-#     payload = ""
-
-#     print("Connecting to REYAX RYLR896 transceiver module…")
-#     serial_conn = serial.Serial(
-#         port="/dev/serial0",
-#         baudrate=115200,
-#         timeout=5,
-#         parity=serial.PARITY_NONE,
-#         stopbits=serial.STOPBITS_ONE,
-#         bytesize=serial.EIGHTBITS
-#     )
-
-#     if serial_conn.isOpen():
-        
-#         prmainnt("Serial Port is Open")
-        
-#         set_lora_config(serial_conn)
-#         check_lora_config(serial_conn)
-        
-        
-#         connect_to_camera(serial_conn)
-        
-        
-#         wait_read(serial_conn)
-        
-#         #CONNECTION SET UP, ENTER STANBY MODE
-        
-#         standby_mode(serial_conn)

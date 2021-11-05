@@ -86,11 +86,6 @@ def check_lora_config(serial_conn):
     serial_payload = (serial_conn.readline())
     print("RF parameters", serial_payload.decode(encoding="utf-8"))
 
-#     serial_conn.write(str.encode("AT+CPIN?\r\n"))
-#     serial_payload = (serial_conn.readline())
-#     print("AES128 password of the network",
-#           serial_payload.decode(encoding="utf-8"))
-
 def send(message, serial_conn, address=115):
     length = len(str(message))
     send_command = "AT+SEND=" + str(address) + "," + str(length) + "," + str(message) + "\r\n"
