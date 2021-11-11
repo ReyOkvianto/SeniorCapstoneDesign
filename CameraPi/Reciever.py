@@ -2,6 +2,7 @@ import logging
 import time
 from argparse import ArgumentParser
 from datetime import datetime
+import RPi.GPIO as GPIO
 
 import serial
 
@@ -16,6 +17,10 @@ ADDRESS = 116
 NETWORK_ID = 6
 CONNECTION_SET = False
 
+GPIO.setmode(GPIO.BCM) # GPIO Numbers instead of board numbers
+RELAIS_1_GPIO = 17
+GPIO.setup(RELAIS_1_GPIO, GPIO.OUT) # GPIO Assign mode
+GPIO.output(RELAIS_1_GPIO, GPIO.LOW) # out
 
 def main():
     logging.basicConfig(filename='output.log', filemode='w', level=logging.DEBUG)
@@ -118,6 +123,7 @@ def wait_read(serial_conn):
                     
                 elif command == "LIGHT":
                     print("TOGGLE LIGHT")
+                    toggle_light()
                     send("SUCCESS", serial_conn)
                     
             except UnicodeDecodeError:  # receiving corrupt data?
@@ -127,6 +133,13 @@ def wait_read(serial_conn):
                 logging.error("IndexError: {}".format(payload))
             except ValueError:
                 logging.error("ValueError: {}".format(payload))
+                
+
+def toggle_light():
+    GPIO.output(RELAIS_1_GPIO, GPIO.HIGH) # out
+    time.sleep(0.5)
+    GPIO.output(RELAIS_1_GPIO, GPIO.LOW) # on
+    print("TOGGLED LIGHT")
 
 if __name__ == "__main__":
     main()
