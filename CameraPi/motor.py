@@ -4,8 +4,6 @@
 # Use this example for digital pin control of an H-bridge driver
 # like a DRV8833, TB6612 or L298N.
 
-#Github token: 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
-
 import time
 import board
 import digitalio
