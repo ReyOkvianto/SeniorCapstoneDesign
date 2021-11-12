@@ -3,7 +3,9 @@ import time
 from argparse import ArgumentParser
 from datetime import datetime
 import RPi.GPIO as GPIO
-
+import board
+import digitalio
+from adafruit_motor import stepper
 import serial
 
 # LoRaWAN IoT Sensor Demo
@@ -21,6 +23,22 @@ GPIO.setmode(GPIO.BCM) # GPIO Numbers instead of board numbers
 RELAIS_1_GPIO = 17
 GPIO.setup(RELAIS_1_GPIO, GPIO.OUT) # GPIO Assign mode
 GPIO.output(RELAIS_1_GPIO, GPIO.LOW) # out
+
+DELAY = 0.01
+STEPS = 200
+
+# To use with a Raspberry Pi:
+coils = (
+     digitalio.DigitalInOut(board.D19),  # A1
+     digitalio.DigitalInOut(board.D26),  # A2
+     digitalio.DigitalInOut(board.D20),  # B1
+     digitalio.DigitalInOut(board.D21),  # B2
+)
+
+for coil in coils:
+    coil.direction = digitalio.Direction.OUTPUT
+
+motor = stepper.StepperMotor(coils[0], coils[1], coils[2], coils[3], microsteps=None)
 
 def main():
     logging.basicConfig(filename='output.log', filemode='w', level=logging.DEBUG)
@@ -42,7 +60,6 @@ def main():
         
         wait_read(serial_conn)
         
-
 
             # time.sleep(2) # transmission frequency set on IoT device
 
@@ -115,10 +132,12 @@ def wait_read(serial_conn):
                     
                 elif command == "UP":
                     print("MOVE CAMERA UP")
+                    move_camera_up()
                     send("SUCCESS", serial_conn)
                     
                 elif command == "DOWN":
                     print("MOVE CAMERA DOWN")
+                    move_camera_down()
                     send("SUCCESS", serial_conn)
                     
                 elif command == "LIGHT":
@@ -140,6 +159,18 @@ def toggle_light():
     time.sleep(0.5)
     GPIO.output(RELAIS_1_GPIO, GPIO.LOW) # on
     print("TOGGLED LIGHT")
+    
+def move_camera_down():
+    print("MOVE MOTOR DOWN")
+    for step in range(STEPS):
+        motor.onestep(style=stepper.DOUBLE)
+        time.sleep(DELAY)
+        
+def move_camera_up():
+    print("MOVE MOTOR UP")
+    for step in range(STEPS):
+        motor.onestep(direction=stepper.BACKWARD, style=stepper.DOUBLE)
+        time.sleep(DELAY)
 
 if __name__ == "__main__":
     main()
