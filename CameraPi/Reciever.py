@@ -7,27 +7,36 @@ import board
 import digitalio
 from adafruit_motor import stepper
 import serial
+import drivers
 
-# LoRaWAN IoT Sensor Demo
-# Using REYAX RYLR896 transceiver modules
-# Author: Gary Stafford
-# Requirements: python3 -m pip install –user -r requirements.txt
-# To Run: python3 ./rasppi_lora_receiver.py –tty /dev/ttyAMA0 –baud-rate 115200
-
-# constants
+## LoRa constants
 ADDRESS = 116
 NETWORK_ID = 6
 CONNECTION_SET = False
 
+## Relay setups
 GPIO.setmode(GPIO.BCM) # GPIO Numbers instead of board numbers
-RELAIS_1_GPIO = 17
-GPIO.setup(RELAIS_1_GPIO, GPIO.OUT) # GPIO Assign mode
-GPIO.output(RELAIS_1_GPIO, GPIO.LOW) # out
 
+## Setup camera power relay
+CAMERA_RELAY_GPIO = 17
+GPIO.setup(CAMERA_RELAY_GPIO, GPIO.OUT) # GPIO Assign mode
+GPIO.output(CAMERA_RELAY_GPIO, GPIO.LOW) # out
+
+
+## Setup FPV power relay
+FPV_RELAY_GPIO = 27
+GPIO.setup(FPV_RELAY_GPIO, GPIO.OUT) # GPIO Assign mode
+GPIO.output(FPV_RELAY_GPIO, GPIO.LOW) # out
+
+
+## Setup camera light relay
+LIGHT_RELAY_GPIO = 22
+GPIO.setup(LIGHT_RELAY_GPIO, GPIO.OUT) # GPIO Assign mode
+GPIO.output(LIGHT_RELAY_GPIO, GPIO.LOW) # out
+
+## Setup motor configuration
 DELAY = 0.01
 STEPS = 200
-
-# To use with a Raspberry Pi:
 coils = (
      digitalio.DigitalInOut(board.D19),  # A1
      digitalio.DigitalInOut(board.D26),  # A2
@@ -39,6 +48,10 @@ for coil in coils:
     coil.direction = digitalio.Direction.OUTPUT
 
 motor = stepper.StepperMotor(coils[0], coils[1], coils[2], coils[3], microsteps=None)
+
+
+## Setup display
+display = drivers.Lcd()
 
 def main():
     logging.basicConfig(filename='output.log', filemode='w', level=logging.DEBUG)
@@ -58,6 +71,15 @@ def main():
         set_lora_config(serial_conn)
         check_lora_config(serial_conn)
         
+        #Wait to connect to the controller
+        wait_connection(serial_conn)
+        
+        
+        #Once connected succesfully, power up rest of system
+        power_up_system()
+        
+        
+        #Once everything is powered up wait for next commands
         wait_read(serial_conn)
         
 
@@ -65,20 +87,26 @@ def main():
 
 def set_lora_config(serial_conn):
     # configures the REYAX RYLR896 transceiver module
-
+    display.lcd_display_string("Setting up LoRa!", 1)
+    
     serial_conn.write(str.encode("AT+ADDRESS=" + str(ADDRESS) + "\r\n"))
     serial_payload = (serial_conn.readline())
     print("Address set?", serial_payload.decode(encoding="utf-8"))
+    display.lcd_display_string("Address set?" + serial_payload.decode(encoding="utf-8"), 2)
 
     serial_conn.write(str.encode("AT+NETWORKID=" + str(NETWORK_ID) + "\r\n"))
     serial_payload = (serial_conn.readline())
     print("Network Id set?", serial_payload.decode(encoding="utf-8"))
+    display.lcd_display_string("Network Id set?" + serial_payload.decode(encoding="utf-8"), 3)
+    
+    time.sleep(5)
+    display.lcd_clear()
 
 
 def check_lora_config(serial_conn):
     serial_conn.write(str.encode("AT?\r\n"))
     serial_payload = (serial_conn.readline())
-    print("Module responding?", serial_payload.decode(encoding="utf-8"))
+    print("ModulLIGHT_RELAY_GPIOe responding?", serial_payload.decode(encoding="utf-8"))
 
     serial_conn.write(str.encode("AT+ADDRESS?\r\n"))
     serial_payload = (serial_conn.readline())
@@ -116,7 +144,47 @@ def send(message, serial_conn, address=115):
     print("Send message: " + send_command)
     print("Message sent?", serial_payload.decode(encoding="utf-8"))
 
+def wait_connection(serial_conn):
+    display.lcd_display_string("Connecting...", 1)
+    while True:
+        serial_payload = serial_conn.readline()  # read data from serial port
+        if len(serial_payload) > 0:
+            #try:
+            payload = serial_payload.decode(encoding="utf-8")
+            print(payload)
+            
+            command = payload.split(',')[-3]
+            
+            if command == "CONNECT":
+                CONNECTION_SET = True
+                display.lcd_display_string("CONNECTED!!!", 2)
+                send("SUCCESS", serial_conn)
+                time.sleep(5)
+                display.lcd_clear()
+                return
+                
+
+def power_up_system():
+    start_up_camera()
+    start_up_FPV()
+    
+
+def start_up_camera():
+    GPIO.output(CAMERA_RELAY_GPIO, GPIO.HIGH) # out
+    time.sleep(0.5)
+    GPIO.output(CAMERA_RELAY_GPIO, GPIO.LOW) # on
+    print("START UP CAMERA")
+    
+
+def start_up_FPV():
+    GPIO.output(FPV_RELAY_GPIO, GPIO.HIGH) # out
+    time.sleep(0.5)
+    GPIO.output(FPV_RELAY_GPIO, GPIO.LOW) # on
+    print("START UP FPV")
+    
+
 def wait_read(serial_conn):
+    display.lcd_display_string("Waiting...", 2)
     while True:
         serial_payload = serial_conn.readline()  # read data from serial port
         if len(serial_payload) > 0:
@@ -125,25 +193,27 @@ def wait_read(serial_conn):
                 print(payload)
                 
                 command = payload.split(',')[-3]
-                
-                if command == "CONNECT":
-                    CONNECTION_SET = True
-                    send("SUCCESS", serial_conn)
                     
-                elif command == "UP":
+                if command == "UP":
                     print("MOVE CAMERA UP")
+                    display.lcd_display_string("MOVE CAMERA UP!!!", 2)
                     move_camera_up()
                     send("SUCCESS", serial_conn)
+                    display.lcd_clear()
                     
                 elif command == "DOWN":
-                    print("MOVE CAMERA DOWN")
+                    print("MOVE CAMERA UP")
+                    display.lcd_display_string("MOVE CAMERA UP!!!", 2)
                     move_camera_down()
                     send("SUCCESS", serial_conn)
+                    display.lcd_clear()
                     
                 elif command == "LIGHT":
                     print("TOGGLE LIGHT")
+                    display.lcd_display_string("TOGGLE LIGHT!!!", 2)
                     toggle_light()
                     send("SUCCESS", serial_conn)
+                    display.lcd_clear()
                     
             except UnicodeDecodeError:  # receiving corrupt data?
                 logging.error("UnicodeDecodeError: {}".format(serial_payload))
@@ -155,9 +225,9 @@ def wait_read(serial_conn):
                 
 
 def toggle_light():
-    GPIO.output(RELAIS_1_GPIO, GPIO.HIGH) # out
+    GPIO.output(LIGHT_RELAY_GPIO, GPIO.HIGH) # out
     time.sleep(0.5)
-    GPIO.output(RELAIS_1_GPIO, GPIO.LOW) # on
+    GPIO.output(LIGHT_RELAY_GPIO, GPIO.LOW) # on
     print("TOGGLED LIGHT")
     
 def move_camera_down():
