@@ -3,6 +3,7 @@ import time
 from argparse import ArgumentParser
 from datetime import datetime
 from threading import *
+import RPi.GPIO as GPIO
 
 import serial
 
@@ -14,6 +15,14 @@ class LoRaController(Thread):
     Network = 6
     Port = "/dev/serial0"
     Serial = None
+    
+    ## Relay setups
+    GPIO.setmode(GPIO.BCM) # GPIO Numbers instead of board numbers
+
+    ## Setup FPV power relay
+    FPV_RELAY_GPIO = 17
+    GPIO.setup(FPV_RELAY_GPIO, GPIO.OUT) # GPIO Assign mode
+    GPIO.output(FPV_RELAY_GPIO, GPIO.LOW) # out
 
 
     def __init__(self):
@@ -94,6 +103,14 @@ class LoRaController(Thread):
             self.send("CONNECT")
 
             connection = self.wait_read()
+            
+            self.start_up_FPV()
+            
+    def start_up_FPV(self):
+        GPIO.output(self.FPV_RELAY_GPIO, GPIO.HIGH) # out
+        time.sleep(0.5)
+        GPIO.output(self.FPV_RELAY_GPIO, GPIO.LOW) # on
+        print("START UP FPV")
 
     def send(self, message, address=116):
         length = len(str(message))

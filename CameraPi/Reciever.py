@@ -171,20 +171,16 @@ def power_up_system():
 
 def start_up_camera():
     GPIO.output(CAMERA_RELAY_GPIO, GPIO.HIGH) # out
-    time.sleep(0.5)
-    GPIO.output(CAMERA_RELAY_GPIO, GPIO.LOW) # on
     print("START UP CAMERA")
     
 
 def start_up_FPV():
     GPIO.output(FPV_RELAY_GPIO, GPIO.HIGH) # out
-    time.sleep(0.5)
-    GPIO.output(FPV_RELAY_GPIO, GPIO.LOW) # on
     print("START UP FPV")
     
 
 def wait_read(serial_conn):
-    display.lcd_display_string("Waiting...", 2)
+    display.lcd_display_string("Waiting...", 1)
     while True:
         serial_payload = serial_conn.readline()  # read data from serial port
         if len(serial_payload) > 0:
@@ -193,6 +189,10 @@ def wait_read(serial_conn):
                 print(payload)
                 
                 command = payload.split(',')[-3]
+                
+                if command == "CONNECT":
+                    send("SUCCESS", serial_conn)
+                    return
                     
                 if command == "UP":
                     print("MOVE CAMERA UP")
@@ -202,7 +202,7 @@ def wait_read(serial_conn):
                     display.lcd_clear()
                     
                 elif command == "DOWN":
-                    print("MOVE CAMERA UP")
+                    print("MOVE CAMERA  DOWN")
                     display.lcd_display_string("MOVE CAMERA UP!!!", 2)
                     move_camera_down()
                     send("SUCCESS", serial_conn)
