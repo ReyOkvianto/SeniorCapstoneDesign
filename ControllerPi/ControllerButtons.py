@@ -53,7 +53,7 @@ class ControllerButtons():
         # create the canvas
         canvas = ImageDraw.Draw(img)
 
-        status_text = cv2.getTextSize("Welcome", cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
+        status_text = cv2.getTextSize("Connecting...", cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
         recording_text = cv2.getTextSize("Not Recording", cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
 
         x_pos_status_text = (self.frame_width - status_text[0]) / 2
@@ -65,7 +65,7 @@ class ControllerButtons():
         img.save('hello_world.png')
 
         self.status_img = cv2.imread('hello_world.png')
-        cv2.putText(self.status_img, "Welcome", (int(x_pos_status_text),int(y_pos_status_text)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
+        cv2.putText(self.status_img, "Connecting...", (int(x_pos_status_text),int(y_pos_status_text)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
 
         self.recording_img = cv2.imread('hello_world.png')
         cv2.putText(self.recording_img, "Not Recording", (int(x_pos_recording_text),int(y_pos_recording_text)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)

@@ -6,6 +6,7 @@ from time import sleep
 from ControllerButtons import ControllerButtons
 from LoRaController import LoRaController
 from threading import *
+from PIL import Image, ImageDraw, ImageFont
 
 # setting up
 # ScreenshotIn = 18
@@ -24,7 +25,10 @@ UpButton = Buttonz.UpButton
 DownButton = Buttonz.DownButton
 LightsButton = Buttonz.LightsButton
 
+
+#Setup LoRa and start thread for sending/reading messages
 loraController = LoRaController()
+
 
 thread = Thread(target=loraController.standby_mode, args=(Buttonz.GetCommand, Buttonz.SetText, ))
 thread.start()
@@ -36,6 +40,9 @@ while(True):
     if ret == True: 
 
         images = np.vstack((Buttonz.recording_img, frame, Buttonz.status_img))
+        
+        cv2.namedWindow("images", cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty("images",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 
         cv2.imshow('images', images)
 

@@ -19,11 +19,6 @@ class LoRaController(Thread):
     ## Relay setups
     GPIO.setmode(GPIO.BCM) # GPIO Numbers instead of board numbers
 
-    ## Setup FPV power relay
-    FPV_RELAY_GPIO = 17
-    GPIO.setup(FPV_RELAY_GPIO, GPIO.OUT) # GPIO Assign mode
-    GPIO.output(FPV_RELAY_GPIO, GPIO.LOW) # out
-
 
     def __init__(self):
         logging.basicConfig(filename='output.log', filemode='w', level=logging.DEBUG)
@@ -46,7 +41,7 @@ class LoRaController(Thread):
             #Set up and check lora connection
             self.set_lora_config()  
             self.check_lora_config()
-            self.connect_to_camera()
+            
 
 
     def set_lora_config(self):
@@ -98,19 +93,12 @@ class LoRaController(Thread):
 
     def connect_to_camera(self):
         connection = False
-        while not connection: 
+        while not connection:
+            #cv2.imshow('images', images)
             print("Try to connect to camera")
             self.send("CONNECT")
 
             connection = self.wait_read()
-            
-            self.start_up_FPV()
-            
-    def start_up_FPV(self):
-        GPIO.output(self.FPV_RELAY_GPIO, GPIO.HIGH) # out
-        time.sleep(0.5)
-        GPIO.output(self.FPV_RELAY_GPIO, GPIO.LOW) # on
-        print("START UP FPV")
 
     def send(self, message, address=116):
         length = len(str(message))
@@ -147,6 +135,9 @@ class LoRaController(Thread):
                     
                     
     def standby_mode(self, get_command, set_text):
+        self.connect_to_camera()
+        set_text("Connected")
+        
         start = None
         while True:
             command = get_command()
