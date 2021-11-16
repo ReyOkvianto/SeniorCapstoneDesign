@@ -39,7 +39,7 @@ while(True):
 
     if ret == True: 
 
-        images = np.vstack((Buttonz.recording_img, frame, Buttonz.status_img))
+        images = np.vstack((Buttonz.recording_img, Buttonz.status_img, frame))
         
         cv2.namedWindow("images", cv2.WND_PROP_FULLSCREEN)
         cv2.setWindowProperty("images",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)

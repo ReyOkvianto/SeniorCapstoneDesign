@@ -57,10 +57,10 @@ class ControllerButtons():
         recording_text = cv2.getTextSize("Not Recording", cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
 
         x_pos_status_text = (self.frame_width - status_text[0]) / 2
-        y_pos_status_text = (image_height + status_text[1]) / 2
+        y_pos_status_text = (image_height + status_text[1]) / 2 
 
         x_pos_recording_text = (self.frame_width - recording_text[0]) / 2
-        y_pos_recording_text = (image_height + recording_text[1]) / 2 
+        y_pos_recording_text = (image_height + recording_text[1]) / 2
 
         img.save('hello_world.png')
 
@@ -121,7 +121,7 @@ class ControllerButtons():
     def RecordStart(self):
         # Define the codec and create VideoWriter object.The output is stored in 'outpy.avi' file.
         self.SetRecordingText("Recording")
-        filename_videos = "videos/Recording_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".avi"
+        filename_videos = "/home/pi/Desktop/VIDEOS/Recording_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".avi"
         self.out = cv2.VideoWriter(filename_videos,cv2.VideoWriter_fourcc('M','J','P','G'), 30, (self.frame_width, self.frame_height))
         
     def RecordStop(self):
@@ -131,8 +131,9 @@ class ControllerButtons():
 
 
     def TakeScreenshot(self, frame):
-        filename_images = "images/Screenshot_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".jpeg"
+        filename_images = "/home/pi/Desktop/IMAGES/Screenshot_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".jpeg"
         cv2.imwrite(filename_images, frame)
+        self.SetText("Took Screenshot")
 
     def GetCommand(self):
         return self.Command
