@@ -89,16 +89,49 @@ def set_lora_config(serial_conn):
     # configures the REYAX RYLR896 transceiver module
     display.lcd_display_string("Setting up LoRa!", 1)
     
-    serial_conn.write(str.encode("AT+ADDRESS=" + str(ADDRESS) + "\r\n"))
-    serial_payload = (serial_conn.readline())
-    print("Address set?", serial_payload.decode(encoding="utf-8"))
-    display.lcd_display_string("Address set?" + serial_payload.decode(encoding="utf-8"), 2)
+    #Set up lora address
+    while True:
+        serial_conn.write(str.encode("AT+ADDRESS=" + str(ADDRESS) + "\r\n"))
+            
+        serial_payload = serial_conn.readline()  # read data from serial port
+        if len(serial_payload) > 0:
+            try:
+                
+                print("Address set?", serial_payload.decode(encoding="utf-8"))
+                
+                if serial_payload.decode(encoding="utf-8") == "+OK\r\n":
+                    display.lcd_display_string("Address set?" + serial_payload.decode(encoding="utf-8"), 2)
+                    break
+                
+            except UnicodeDecodeError:  # receiving corrupt data?
+                logging.error("UnicodeDecodeError: {}".format(serial_payload))
 
-    serial_conn.write(str.encode("AT+NETWORKID=" + str(NETWORK_ID) + "\r\n"))
-    serial_payload = (serial_conn.readline())
-    print("Network Id set?", serial_payload.decode(encoding="utf-8"))
-    display.lcd_display_string("Network Id set?" + serial_payload.decode(encoding="utf-8"), 3)
-    
+            except IndexError:
+                logging.error("IndexError: {}".format(payload))
+            except ValueError:
+                logging.error("ValueError: {}".format(payload))
+
+    #Set up network id
+    while True:
+        serial_conn.write(str.encode("AT+NETWORKID=" + str(NETWORK_ID) + "\r\n"))
+            
+        serial_payload = serial_conn.readline()  # read data from serial port
+        if len(serial_payload) > 0:
+            try:
+                
+                print("Network Id set?", serial_payload.decode(encoding="utf-8"))
+                
+                if serial_payload.decode(encoding="utf-8") == "+OK\r\n":
+                    display.lcd_display_string("Network Id set?" + serial_payload.decode(encoding="utf-8"), 3)
+                    break
+            except UnicodeDecodeError:  # receiving corrupt data?
+                logging.error("UnicodeDecodeError: {}".format(serial_payload))
+
+            except IndexError:
+                logging.error("IndexError: {}".format(payload))
+            except ValueError:
+                logging.error("ValueError: {}".format(payload))
+                
     time.sleep(5)
     display.lcd_clear()
 
@@ -179,18 +212,16 @@ def start_up_FPV():
     
 
 def wait_read(serial_conn):
+    connection = CONNECTION_SET
     display.lcd_display_string("Waiting...", 1)
     while True:
         #Keep trying to confirm connected until command received
-        if not CONNECTION_SET:
-            send("CONNECTION CONFIRMED")
+        if not connection:
+            send("CONNECTION CONFIRMED", serial_conn)
             
         serial_payload = serial_conn.readline()  # read data from serial port
         if len(serial_payload) > 0:
             try:
-                #Once command received, connection is confirmed
-                if not CONNECTION_SET:
-                    CONNECTION_SET = True
                 
                 payload = serial_payload.decode(encoding="utf-8")
                 print(payload)
@@ -198,6 +229,7 @@ def wait_read(serial_conn):
                 command = payload.split(',')[-3]
                 
                 if command == "UP":
+                    connection = True
                     print("MOVE CAMERA UP")
                     display.lcd_display_string("MOVE CAMERA UP!!!", 2)
                     move_camera_up()
@@ -205,6 +237,7 @@ def wait_read(serial_conn):
                     display.lcd_clear()
                     
                 elif command == "DOWN":
+                    connection = True
                     print("MOVE CAMERA  DOWN")
                     display.lcd_display_string("!!", 2)
                     move_camera_down()
@@ -212,10 +245,18 @@ def wait_read(serial_conn):
                     display.lcd_clear()
                     
                 elif command == "LIGHT":
+                    connection = True
                     print("TOGGLE LIGHT")
                     display.lcd_display_string("TOGGLE LIGHT!!!", 2)
                     toggle_light()
                     send("SUCCESS", serial_conn)
+                    display.lcd_clear()
+                
+                elif command == "CONNECT":
+                    connection = False
+                    print("CONNECTION SET")
+                    display.lcd_display_string("CONNECTED AGAIN!!!", 2)
+                    send("CONNECTION CONFIRMED", serial_conn)
                     display.lcd_clear()
                     
             except UnicodeDecodeError:  # receiving corrupt data?
