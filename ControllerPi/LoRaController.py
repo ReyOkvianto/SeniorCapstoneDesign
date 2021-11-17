@@ -100,7 +100,7 @@ class LoRaController(Thread):
             print("Try to connect to camera")
             self.send("CONNECT")
 
-            connection = True #self.wait_read()
+            connection = self.wait_read()
 
     def send(self, message, address=116):
         length = len(str(message))
