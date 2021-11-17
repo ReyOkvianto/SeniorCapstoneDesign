@@ -156,9 +156,8 @@ def wait_connection(serial_conn):
             command = payload.split(',')[-3]
             
             if command == "CONNECT":
-                CONNECTION_SET = True
                 display.lcd_display_string("CONNECTED!!!", 2)
-                send("SUCCESS", serial_conn)
+                send("CONNECTION CONFIRMED", serial_conn)
                 time.sleep(5)
                 display.lcd_clear()
                 return
@@ -182,18 +181,22 @@ def start_up_FPV():
 def wait_read(serial_conn):
     display.lcd_display_string("Waiting...", 1)
     while True:
+        #Keep trying to confirm connected until command received
+        if not CONNECTION_SET:
+            send("CONNECTION CONFIRMED")
+            
         serial_payload = serial_conn.readline()  # read data from serial port
         if len(serial_payload) > 0:
             try:
+                #Once command received, connection is confirmed
+                if not CONNECTION_SET:
+                    CONNECTION_SET = True
+                
                 payload = serial_payload.decode(encoding="utf-8")
                 print(payload)
                 
                 command = payload.split(',')[-3]
                 
-                if command == "CONNECT":
-                    send("SUCCESS", serial_conn)
-                    return
-                    
                 if command == "UP":
                     print("MOVE CAMERA UP")
                     display.lcd_display_string("MOVE CAMERA UP!!!", 2)
@@ -203,7 +206,7 @@ def wait_read(serial_conn):
                     
                 elif command == "DOWN":
                     print("MOVE CAMERA  DOWN")
-                    display.lcd_display_string("MOVE CAMERA UP!!!", 2)
+                    display.lcd_display_string("!!", 2)
                     move_camera_down()
                     send("SUCCESS", serial_conn)
                     display.lcd_clear()

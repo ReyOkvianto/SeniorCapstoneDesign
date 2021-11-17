@@ -77,6 +77,7 @@ class ControllerButtons():
             if self.ScreenshotButton == button:
                 print("SCREENSHOT BUTTON HAS BEEN PRESSED")
                 self.TakeScreenshot(frame)
+                self.Command = "SCREENSHOT"
             if self.RecordButton == button:
                 print("Record BUTTON HAS BEEN PRESSED")
 
@@ -133,7 +134,7 @@ class ControllerButtons():
     def TakeScreenshot(self, frame):
         filename_images = "/home/pi/Desktop/IMAGES/Screenshot_" + datetime.now().strftime("%m_%d_%Y_%H_%M_%S") + ".jpeg"
         cv2.imwrite(filename_images, frame)
-        self.SetText("Took Screenshot")
+        #self.SetText("Took Screenshot")
 
     def GetCommand(self):
         return self.Command

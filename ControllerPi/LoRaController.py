@@ -18,6 +18,8 @@ class LoRaController(Thread):
     
     ## Relay setups
     GPIO.setmode(GPIO.BCM) # GPIO Numbers instead of board numbers
+    
+    Connected = False
 
 
     def __init__(self):
@@ -119,6 +121,10 @@ class LoRaController(Thread):
                     
                     command = payload.split(',')[-3] if len(payload.split(',')) > 2 else None
                     
+                    if command == "CONNECTION CONFIRMED"
+                        self.Connected = True
+                        return True
+                    
                     if command == "SUCCESS":
                         return True
                         
@@ -165,6 +171,9 @@ class LoRaController(Thread):
                 else:
                     start = datetime.now()
                     set_text("Error: Camera Not Responding, Try again")
+            elif command == "SCREENSHOT":
+                start = datetime.now()
+                set_text("Screenshot Taken")
             
             if start and (datetime.now() - start).total_seconds() > 5: 
                 set_text("")
